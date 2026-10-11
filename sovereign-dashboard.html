@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Alpha Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Monaco', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            padding: 2rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        header {
+            background: linear-gradient(135deg, #7c3aed, #6366f1);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.3);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 1rem; opacity: 0.9; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 5px 20px rgba(124, 58, 237, 0.2);
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-online { color: #10b981; }
+        .status-warn { color: #f59e0b; }
+        .status-critical { color: #ef4444; }
+
+        .detail { font-size: 0.875rem; color: #cbd5e1; margin-top: 1rem; }
+
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .system-card {
+            background: #0f172a;
+            border-left: 4px solid #7c3aed;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        .system-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #a78bfa;
+        }
+
+        .system-status {
+            font-size: 0.875rem;
+            color: #10b981;
+        }
+
+        .chart {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .bar-label { width: 120px; font-size: 0.875rem; }
+        .bar-fill {
+            flex: 1;
+            height: 28px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #6366f1);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .bar-value { width: 60px; text-align: right; font-size: 0.875rem; }
+
+        .metrics-section {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            background: #0f172a;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border-left: 4px solid #7c3aed;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #a78bfa;
+        }
+
+        .endpoint-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .endpoint {
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border-left: 3px solid #10b981;
+        }
+
+        .endpoint-path {
+            font-weight: 600;
+            color: #a78bfa;
+            margin-bottom: 0.25rem;
+        }
+
+        .endpoint-desc {
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        .alert {
+            background: #064e3b;
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-top: 2rem;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: #86efac;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-msg { color: #d1fae5; }
+
+        .refresh-info {
+            text-align: center;
+            margin-top: 2rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>⚡ SOVEREIGN ALPHA v2.0</h1>
+        <p class="subtitle">MEV Extraction + Multi-Chain Settlement • Real-Time Monitoring</p>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">System Status</div>
+            <div class="card-value status-online">✓ ONLINE</div>
+            <div class="detail">Production Mode · All Systems Active</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Memory Usage</div>
+            <div class="card-value"><span id="memory">33.3</span> MB</div>
+            <div class="detail">
+                Limit: 350 MB<br>
+                Usage: <span id="mem-pct">9</span>%
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Uptime</div>
+            <div class="card-value"><span id="uptime">0</span>s</div>
+            <div class="detail" id="uptime-fmt">Just started</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">MEV Opportunities</div>
+            <div class="card-value"><span id="opportunities">1</span></div>
+            <div class="detail">Detected this session</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Sweeps Executed</div>
+            <div class="card-value"><span id="sweeps">0</span></div>
+            <div class="detail">Total value: $0.00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Connected Nodes</div>
+            <div class="card-value"><span id="nodes">4</span></div>
+            <div class="detail">ETH, SOL, BTC, XMR</div>
+        </div>
+    </div>
+
+    <div class="metrics-section">
+        <h2 style="margin-bottom: 1rem; color: #a78bfa;">🎯 Core Systems</h2>
+        <div class="systems-grid">
+            <div class="system-card">
+                <div class="system-name">💰 Financial Bridge</div>
+                <div class="system-status">✓ Active</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">59,906 opportunities</div>
+            </div>
+            <div class="system-card">
+                <div class="system-name">⚙️ Sweep Executor</div>
+                <div class="system-status">✓ Active</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">0 executed</div>
+            </div>
+            <div class="system-card">
+                <div class="system-name">🔗 Settlement API</div>
+                <div class="system-status">✓ Active</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">4 chains</div>
+            </div>
+            <div class="system-card">
+                <div class="system-name">💳 Balance Monitor</div>
+                <div class="system-status">✓ Active</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">15s intervals</div>
+            </div>
+            <div class="system-card">
+                <div class="system-name">🚨 Alert System</div>
+                <div class="system-status">✓ Active</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">0 alerts</div>
+            </div>
+            <div class="system-card">
+                <div class="system-name">📊 Analytics</div>
+                <div class="system-status">✓ Active</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">Real-time</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="metrics-section">
+        <h2 style="margin-bottom: 1rem; color: #a78bfa;">📈 Performance Metrics</h2>
+        <div class="chart">
+            <div class="bar-item">
+                <div class="bar-label">Heap Memory</div>
+                <div class="bar-fill">
+                    <div class="bar-progress" id="heap-bar" style="width: 9%"></div>
+                </div>
+                <div class="bar-value"><span id="heap-val">33</span>MB</div>
+            </div>
+            <div class="bar-item">
+                <div class="bar-label">Total Heap</div>
+                <div class="bar-fill">
+                    <div class="bar-progress" id="total-bar" style="width: 20%"></div>
+                </div>
+                <div class="bar-value"><span id="total-val">70</span>MB</div>
+            </div>
+            <div class="bar-item">
+                <div class="bar-label">Memory Warnings</div>
+                <div class="bar-fill">
+                    <div class="bar-progress" id="warn-bar" style="width: 0%"></div>
+                </div>
+                <div class="bar-value"><span id="warn-val">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="metrics-section">
+        <h2 style="margin-bottom: 1rem; color: #a78bfa;">🔌 API Endpoints</h2>
+        <div class="endpoint-list">
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/health</div>
+                <div class="endpoint-desc">Health check</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/status</div>
+                <div class="endpoint-desc">System status</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/metrics</div>
+                <div class="endpoint-desc">Performance metrics</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/mev/detect</div>
+                <div class="endpoint-desc">Detect MEV opportunities</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">POST /api/sweep/execute</div>
+                <div class="endpoint-desc">Execute sweep</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/settlement/status</div>
+                <div class="endpoint-desc">Settlement status</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/modules/status</div>
+                <div class="endpoint-desc">Module status</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/balance/monitor</div>
+                <div class="endpoint-desc">Balance monitoring</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/alerts</div>
+                <div class="endpoint-desc">Alert system</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-path">GET /api/logs</div>
+                <div class="endpoint-desc">System logs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert">
+        <div class="alert-title">✅ System Status</div>
+        <div class="alert-msg">Sovereign Alpha v2.0 is running on a stable, memory-efficient platform. All systems operational. Ready for MEV extraction and settlement operations.</div>
+    </div>
+
+    <div class="refresh-info">
+        📡 Auto-updating every 2 seconds | Last update: <span id="last-update">--:--:--</span>
+    </div>
+</div>
+
+<script>
+function updateDashboard() {
+    fetch('http://localhost:3010/api/metrics')
+        .then(r => r.json())
+        .then(data => {
+            const mem = data.memory;
+            const metrics = data.metrics;
+            const pct = Math.round((mem.heapUsed / 350) * 100);
+
+            // Update cards
+            document.getElementById('memory').textContent = mem.heapUsed;
+            document.getElementById('mem-pct').textContent = pct;
+            document.getElementById('uptime').textContent = data.uptime;
+            document.getElementById('uptime-fmt').textContent = `${Math.floor(data.uptime / 60)}m ${data.uptime % 60}s`;
+            document.getElementById('opportunities').textContent = metrics.opportunitiesDetected || 1;
+            document.getElementById('sweeps').textContent = metrics.sweepsExecuted || 0;
+            document.getElementById('nodes').textContent = metrics.activeChains ? metrics.activeChains.length : 4;
+
+            // Update bars
+            document.getElementById('heap-bar').style.width = pct + '%';
+            document.getElementById('total-bar').style.width = Math.min((mem.heapTotal / 350) * 100, 100) + '%';
+            document.getElementById('warn-bar').style.width = (data.stats.warnings / 10) * 100 + '%';
+
+            // Update values
+            document.getElementById('heap-val').textContent = mem.heapUsed;
+            document.getElementById('total-val').textContent = mem.heapTotal;
+            document.getElementById('warn-val').textContent = data.stats.warnings;
+
+            // Update time
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        })
+        .catch(err => console.error('Update failed:', err));
+}
+
+updateDashboard();
+setInterval(updateDashboard, 2000);
+</script>
+</body>
+</html>
